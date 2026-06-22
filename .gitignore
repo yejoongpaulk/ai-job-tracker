@@ -1,0 +1,31 @@
+# =====================================================================
+# FRONTEND CONFIGS (Vite / React / Node)
+# =====================================================================
+frontend/node_modules/
+frontend/dist/
+frontend/dist-ssr/
+frontend/.local
+frontend/.env
+frontend/.env.production
+frontend/.eslintcache
+frontend/.vite/
+
+# =====================================================================
+# BACKEND CONFIGS (Python / FastAPI / Pytest)
+# =====================================================================
+backend/__pycache__/
+backend/*.py[cod]
+backend/*$py.class
+backend/.pytest_cache/
+backend/.venv/
+backend/venv/
+backend/ENV/
+backend/.env
+
+# =====================================================================
+# INFRASTRUCTURE (Databases & Cache Memory Logs)
+# =====================================================================
+.valkey/
+postgres_data/
+.DS_Store
+Thumbs.db
