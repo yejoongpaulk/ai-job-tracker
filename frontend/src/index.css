@@ -1,111 +1,489 @@
+/* ==========================================================================
+   1. GLOBAL SYSTEM RESETS & CUSTOM VARIABLES
+   ========================================================================== */
 :root {
-  --text: #6b6375;
-  --text-h: #08060d;
-  --bg: #fff;
-  --border: #e5e4e7;
-  --code-bg: #f4f3ec;
-  --accent: #aa3bff;
-  --accent-bg: rgba(170, 59, 255, 0.1);
-  --accent-border: rgba(170, 59, 255, 0.5);
-  --social-bg: rgba(244, 243, 236, 0.5);
-  --shadow:
-    rgba(0, 0, 0, 0.1) 0 10px 15px -3px, rgba(0, 0, 0, 0.05) 0 4px 6px -2px;
-
-  --sans: system-ui, 'Segoe UI', Roboto, sans-serif;
-  --heading: system-ui, 'Segoe UI', Roboto, sans-serif;
-  --mono: ui-monospace, Consolas, monospace;
-
-  font: 18px/145% var(--sans);
-  letter-spacing: 0.18px;
-  color-scheme: light dark;
-  color: var(--text);
-  background: var(--bg);
-  font-synthesis: none;
-  text-rendering: optimizeLegibility;
-  -webkit-font-smoothing: antialiased;
-  -moz-osx-font-smoothing: grayscale;
-
-  @media (max-width: 1024px) {
-    font-size: 16px;
-  }
+  --bg-main: #0f172a;       /* Slate 900 - Core App Background */
+  --bg-surface: #1e293b;    /* Slate 800 - Cards & Panels Surface */
+  --bg-input: #334155;      /* Slate 700 - Input Form Elements */
+  
+  --text-main: #f8fafc;     /* Slate 50 - High contrast headers */
+  --text-muted: #94a3b8;    /* Slate 400 - Low contrast descriptors */
+  
+  --primary: #6366f1;       /* Indigo 500 - Primary Actions / CTA */
+  --primary-hover: #4f46e5; /* Indigo 600 */
+  
+  --accent-success: #10b981; /* Emerald 500 - Offered State */
+  --accent-warning: #f59e0b; /* Amber 500 - Interviewing State */
+  --accent-danger: #ef4444;  /* Red 500 - Rejected State */
+  --accent-neutral: #64748b; /* Slate 500 - Applied State */
+  
+  --radius-sm: 6px;
+  --radius-md: 12px;
+  --transition-smooth: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+  
+  font-family: Inter, system-ui, Avenir, Helvetica, Arial, sans-serif;
+  color-scheme: dark;
 }
 
-@media (prefers-color-scheme: dark) {
-  :root {
-    --text: #9ca3af;
-    --text-h: #f3f4f6;
-    --bg: #16171d;
-    --border: #2e303a;
-    --code-bg: #1f2028;
-    --accent: #c084fc;
-    --accent-bg: rgba(192, 132, 252, 0.15);
-    --accent-border: rgba(192, 132, 252, 0.5);
-    --social-bg: rgba(47, 48, 58, 0.5);
-    --shadow:
-      rgba(0, 0, 0, 0.4) 0 10px 15px -3px, rgba(0, 0, 0, 0.25) 0 4px 6px -2px;
-  }
-
-  #social .button-icon {
-    filter: invert(1) brightness(2);
-  }
+* {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
 }
 
 body {
-  margin: 0;
+  background-color: var(--bg-main);
+  color: var(--text-main);
+  min-height: 100vh;
+  line-height: 1.5;
 }
 
-#root {
-  width: 1126px;
-  max-width: 100%;
-  margin: 0 auto;
+/* ==========================================================================
+   2. AUTHENTICATION PAGES LAYOUT (Login & Register)
+   ========================================================================== */
+.auth-container {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 100vh;
+  padding: 24px;
+}
+
+.auth-card {
+  background-color: var(--bg-surface);
+  width: 100%;
+  max-width: 440px;
+  padding: 40px;
+  border-radius: var(--radius-md);
+  box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.3), 0 10px 10px -5px rgba(0, 0, 0, 0.2);
+}
+
+.auth-card h2 {
+  font-size: 28px;
+  font-weight: 700;
+  margin-bottom: 8px;
   text-align: center;
-  border-inline: 1px solid var(--border);
-  min-height: 100svh;
+}
+
+.auth-subtitle {
+  color: var(--text-muted);
+  font-size: 14px;
+  text-align: center;
+  margin-bottom: 32px;
+}
+
+.auth-form {
   display: flex;
   flex-direction: column;
-  box-sizing: border-box;
+  gap: 20px;
 }
 
-h1,
-h2 {
-  font-family: var(--heading);
+/* Input Wrappers & Icon Position Hooks */
+.input-group {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.input-group label {
+  font-size: 13px;
   font-weight: 500;
-  color: var(--text-h);
+  color: var(--text-muted);
 }
 
-h1 {
-  font-size: 56px;
-  letter-spacing: -1.68px;
-  margin: 32px 0;
-  @media (max-width: 1024px) {
-    font-size: 36px;
-    margin: 20px 0;
-  }
-}
-h2 {
-  font-size: 24px;
-  line-height: 118%;
-  letter-spacing: -0.24px;
-  margin: 0 0 8px;
-  @media (max-width: 1024px) {
-    font-size: 20px;
-  }
-}
-p {
-  margin: 0;
+.input-with-icon {
+  position: relative;
+  display: flex;
+  align-items: center;
 }
 
-code,
-.counter {
-  font-family: var(--mono);
-  display: inline-flex;
-  border-radius: 4px;
-  color: var(--text-h);
+.input-icon {
+  position: absolute;
+  left: 14px;
+  color: var(--text-muted);
+  pointer-events: none;
 }
 
-code {
+.input-with-icon input,
+.form-group-field input,
+.form-group-field select,
+.form-group-field textarea {
+  width: 100%;
+  padding: 12px 16px;
+  background-color: var(--bg-input);
+  border: 1px solid transparent;
+  border-radius: var(--radius-sm);
+  color: var(--text-main);
   font-size: 15px;
-  line-height: 135%;
+  transition: var(--transition-smooth);
+}
+
+.input-with-icon input {
+  padding-left: 44px; /* Push placeholder past absolute icon layer */
+}
+
+.input-with-icon input:focus,
+.form-group-field input:focus,
+.form-group-field select:focus,
+.form-group-field textarea:focus {
+  outline: none;
+  border-color: var(--primary);
+  box-shadow: 0 0 0 3px rgba(99, 102, 241, 0.2);
+}
+
+/* Submission CTA Components */
+.auth-button, .form-submit-cta {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  background-color: var(--primary);
+  color: white;
+  border: none;
+  padding: 14px;
+  border-radius: var(--radius-sm);
+  font-size: 16px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: var(--transition-smooth);
+  width: 100%;
+}
+
+.auth-button:hover:not(:disabled), .form-submit-cta:hover:not(:disabled) {
+  background-color: var(--primary-hover);
+}
+
+.auth-button:disabled, .form-submit-cta:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
+.auth-footer {
+  text-align: center;
+  font-size: 14px;
+  color: var(--text-muted);
+  margin-top: 24px;
+}
+
+.auth-footer a {
+  color: var(--primary);
+  text-decoration: none;
+  font-weight: 500;
+}
+
+.auth-footer a:hover {
+  text-decoration: underline;
+}
+
+/* Validation System Message Status Blocks */
+.auth-error-banner, .error-alert {
+  background-color: rgba(239, 68, 68, 0.15);
+  border: 1px solid var(--accent-danger);
+  color: #fca5a5;
+  padding: 12px;
+  border-radius: var(--radius-sm);
+  font-size: 14px;
+  margin-bottom: 16px;
+}
+
+.auth-success-banner {
+  background-color: rgba(16, 185, 129, 0.15);
+  border: 1px solid var(--accent-success);
+  color: #a7f3d0;
+  padding: 12px;
+  border-radius: var(--radius-sm);
+  font-size: 14px;
+  margin-bottom: 16px;
+}
+
+/* ==========================================================================
+   3. APPLICATION WORKSPACE CONTAINER (Dashboard Layout)
+   ========================================================================== */
+.dashboard-layout {
+  display: flex;
+  flex-direction: column;
+  min-height: 100vh;
+}
+
+/* Global Application Header Navigation Banner */
+.dashboard-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  background-color: var(--bg-surface);
+  padding: 16px 32px;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+}
+
+.header-left {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.header-icon {
+  color: var(--primary);
+}
+
+.header-left h1 {
+  font-size: 20px;
+  font-weight: 700;
+}
+
+.header-right {
+  display: flex;
+  align-items: center;
+  gap: 20px;
+}
+
+.user-greeting {
+  font-size: 14px;
+  color: var(--text-muted);
+}
+
+.logout-button {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  background: transparent;
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  color: var(--text-muted);
+  padding: 8px 14px;
+  border-radius: var(--radius-sm);
+  cursor: pointer;
+  font-size: 13px;
+  font-weight: 500;
+  transition: var(--transition-smooth);
+}
+
+.logout-button:hover {
+  background-color: rgba(239, 68, 68, 0.1);
+  border-color: var(--accent-danger);
+  color: #ef4444;
+}
+
+/* Workspace Panels Partition Split */
+.dashboard-content {
+  display: grid;
+  grid-template-columns: 1fr 380px; /* Fluid tracking grid + fixed utility drawer */
+  flex-grow: 1;
+  height: calc(100vh - 69px);      /* Constrains view to viewport boundary below header */
+  overflow: hidden;
+}
+
+/* Left Board Workspace Scroller Setup */
+.tracker-panel {
+  padding: 32px;
+  overflow-y: auto;
+}
+
+.tracker-panel h2 {
+  font-size: 22px;
+  font-weight: 600;
+  margin-bottom: 24px;
+}
+
+/* Application Pipelines Card-Grid Matrix */
+.jobs-list-grid {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.job-row-card {
+  background-color: var(--bg-surface);
+  border-radius: var(--radius-sm);
+  padding: 20px;
+  border: 1px solid rgba(255, 255, 255, 0.02);
+  transition: var(--transition-smooth);
+}
+
+.job-row-card:hover {
+  transform: translateY(-2px);
+  border-color: rgba(255, 255, 255, 0.08);
+  box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.2);
+}
+
+.card-main-info {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 16px;
+  margin-bottom: 16px;
+}
+
+.title-block h3 {
+  font-size: 18px;
+  font-weight: 600;
+  margin-bottom: 4px;
+}
+
+.company-meta {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  color: var(--text-muted);
+  font-size: 14px;
+}
+
+/* Status Interface Pickers */
+.status-mutation-cell {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  gap: 8px;
+}
+
+/* Contextual Reactive State Badges */
+.status-badge {
+  font-size: 12px;
+  font-weight: 600;
+  padding: 4px 10px;
+  border-radius: 9999px;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+}
+
+.badge-neutral { background-color: rgba(100, 116, 139, 0.15); color: #cbd5e1; border: 1px solid var(--accent-neutral); }
+.badge-warning { background-color: rgba(245, 158, 11, 0.15); color: #fde68a; border: 1px solid var(--accent-warning); }
+.badge-success { background-color: rgba(16, 185, 129, 0.15); color: #a7f3d0; border: 1px solid var(--accent-success); }
+.badge-danger  { background-color: rgba(239, 68, 68, 0.15);  color: #fca5a5; border: 1px solid var(--accent-danger); }
+
+.status-dropdown-select {
+  background-color: var(--bg-input);
+  border: none;
+  color: var(--text-muted);
+  font-size: 12px;
   padding: 4px 8px;
-  background: var(--code-bg);
+  border-radius: var(--radius-sm);
+  cursor: pointer;
+  outline: none;
+}
+
+.status-dropdown-select:focus {
+  color: var(--text-main);
+  box-shadow: 0 0 0 2px var(--primary);
+}
+
+/* Lower Row Functional Card Controls */
+.card-footer-actions {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  border-top: 1px solid rgba(255, 255, 255, 0.05);
+  padding-top: 14px;
+}
+
+.ai-metadata-tag {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 12px;
+  font-weight: 500;
+}
+
+.ai-metadata-tag.active { color: #818cf8; }
+.ai-metadata-tag.empty { color: rgba(255, 255, 255, 0.2); }
+
+.delete-row-action {
+  background: transparent;
+  border: none;
+  color: rgba(255, 255, 255, 0.2);
+  cursor: pointer;
+  transition: var(--transition-smooth);
+}
+
+.delete-row-action:hover {
+  color: #f87171;
+}
+
+/* ==========================================================================
+   4. RIGHT-SIDE UTILITY PANEL DRAWER (Sticky Form Container)
+   ========================================================================== */
+.creation-panel-drawer {
+  background-color: var(--bg-surface);
+  border-left: 1px solid rgba(255, 255, 255, 0.05);
+  padding: 32px;
+  overflow-y: auto;
+}
+
+.sticky-form-container {
+  position: relative;
+}
+
+.form-title-header {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-bottom: 24px;
+  color: #818cf8;
+}
+
+.form-title-header h2 {
+  font-size: 18px;
+  font-weight: 600;
+  color: var(--text-main);
+}
+
+.creation-form {
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+}
+
+.form-group-field {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.form-group-field label {
+  font-size: 13px;
+  font-weight: 500;
+  color: var(--text-muted);
+}
+
+.form-group-field textarea {
+  resize: vertical;
+  min-height: 120px;
+  font-family: inherit;
+}
+
+/* ==========================================================================5. UTILITY & FALLBACK PLUG-IN STATES========================================================================== */
+.loading-spinner {
+  display: flex;
+  justify-content: center;
+  color: var(--text-muted);
+  font-size: 15px;
+  padding: 60px 0;
+}
+
+.empty-state {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  text-align: center;
+  padding: 80px 24px;
+  color: var(--text-muted);
+  gap: 16px;
+}
+
+.empty-state p {
+  max-width: 320px;
+  font-size: 14px;
+}
+
+/* Layout Responsiveness Adaptations */
+@media (max-width: 900px) {
+  .dashboard-content {
+    grid-template-columns: 1fr;
+    height: auto;
+    overflow: visible;
+  }
+  
+  .creation-panel-drawer {
+    border-left: none;
+    border-top: 1px solid rgba(255, 255, 255, 0.05);
+  }
 }

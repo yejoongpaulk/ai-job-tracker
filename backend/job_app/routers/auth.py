@@ -126,3 +126,15 @@ async def logout(
     # Overwrite browser storage cookie pointer immediately
     response.delete_cookie(key=COOKIE_NAME)
     return {"detail": "Successfully logged out."}
+
+
+# ==========================================
+# 5. Get Current User Profile Endpoint
+# ==========================================
+@router.get("/me", response_model=SessionData)
+async def get_me(current_user: SessionData = Depends(get_current_user)) -> SessionData:
+    """
+    Returns the active user context payload if their Valkey session cookie is valid.
+    This is what the front-end hits on boot to verify the user is logged in.
+    """
+    return current_user
