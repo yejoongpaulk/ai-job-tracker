@@ -1,0 +1,8 @@
+[tool.basedpyright]
+# 🚀 Turn off the implicit relative import warning globally for your workspace
+reportImplicitRelativeImport = false
+
+# Ensure basedpyright maps the workspace root accurately
+executionEnvironments = [
+  { root = "." }
+]
