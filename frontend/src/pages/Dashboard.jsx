@@ -28,6 +28,10 @@ const Dashboard = () => {
   const [rawJobPosting, setRawJobPosting] = useState('');
   const [isSubmitting, setIsSubmitting] = useState(false);
 
+  // Add this state hook along with your other state variables
+  const [processingAiIds, setProcessingAiIds] = useState({});
+  const [expandedPostingIds, setExpandedPostingIds] = useState({});
+
   // --- 2. API INTERACTION HANDLERS ---
 
   // Fetch all tracking rows belonging strictly to the user (GET /jobs/)
@@ -113,6 +117,38 @@ const Dashboard = () => {
     case 'Wishlist': return 'badge-neutral';
     default: return 'badge-neutral';
   }
+
+  // generate the actual AI summary
+  const handleGenerateAiSummary = async (jobId) => {
+    // Lock the card UI and mark it as active/loading
+    setProcessingAiIds(prev => ({ ...prev, [jobId]: true }));
+    setError('');
+
+    try {
+      const response = await api.post(`/jobs/${jobId}/summarize`);
+      
+      // Instantly swap the updated row with the new ai_summary text into the reactive array
+      setJobs(jobs.map(job => job.id === jobId ? response.data : job));
+    } catch (err) {
+      if (err.response?.status === 429) {
+        alert(err.response.data.detail); // Valkey rate limit block
+      } else {
+        alert(err.response?.data?.detail || "Failed to trigger remote AI completions.");
+      }
+    } finally {
+      // Unlock the card component
+      setProcessingAiIds(prev => ({ ...prev, [jobId]: false }));
+    }
+  };
+
+
+  // show the actual raw text of the posting
+  const togglePostingVisibility = (jobId) => {
+    setExpandedPostingIds(prev => ({
+      ...prev,
+      [jobId]: !prev[jobId]
+    }));
+  };
 };
 
 
@@ -182,24 +218,91 @@ const Dashboard = () => {
                     </div>
                   </div>
 
-                  {/* Footer Context Info Meta Tags */}
+                  {/* Case A: AI Summary has been generated successfully */}
+                  {job.ai_summary && (
+                    <div className="ai-summary-display-block" style={{
+                      backgroundColor: 'rgba(99, 102, 241, 0.05)',
+                      borderLeft: '3px solid #6366f1',
+                      padding: '12px 16px',
+                      borderRadius: '0 6px 6px 0',
+                      fontSize: '14px',
+                      margin: '12px 0',
+                      color: '#cbd5e1',
+                      whiteSpace: 'pre-line'
+                    }}>
+                      {job.ai_summary}
+                    </div>
+                  )}
+
+                  {/* Case B: Raw text exists but no AI Summary has been run yet -> Show Button */}
+                  {!job.ai_summary && job.raw_job_posting && (
+                    <div style={{ margin: '12px 0' }}>
+                      <button
+                        onClick={() => handleGenerateAiSummary(job.id)}
+                        disabled={processingAiIds[job.id]}
+                        style={{
+                          backgroundColor: 'transparent',
+                          border: '1px dashed #6366f1',
+                          color: '#818cf8',
+                          padding: '8px 12px',
+                          borderRadius: '6px',
+                          fontSize: '13px',
+                          fontWeight: '500',
+                          cursor: 'pointer',
+                          transition: 'all 0.2s ease'
+                        }}
+                      >
+                        {processingAiIds[job.id] ? 'NVIDIA Nemotron Reading...' : '✨ Generate AI Summary'}
+                      </button>
+                    </div>
+                  )}
+
+                  {/* Lower Row Functional Card Controls */}
                   <div className="card-footer-actions">
+                    
+                    {/* Clean, error-free interactive status indicator segment */}
                     <div className="ai-status-indicator">
                       {job.raw_job_posting ? (
-                        <span className="ai-metadata-tag active" title="Raw source text stored for parsing analytics">
-                          <FileText size={12} /> AI Text Loaded
-                        </span>
+                        <button
+                          type="button"
+                          onClick={() => togglePostingVisibility(job.id)}
+                          className={`raw-text-toggle-btn ${expandedPostingIds[job.id] ? 'active' : ''}`}
+                          style={{
+                            display: 'flex',
+                            alignItems: 'center',
+                            gap: '6px',
+                            background: 'transparent',
+                            border: 'none',
+                            fontSize: '12px',
+                            fontWeight: '500',
+                            color: expandedPostingIds[job.id] ? '#818cf8' : '#94a3b8',
+                            cursor: 'pointer',
+                            padding: '4px 8px',
+                            borderRadius: '4px',
+                            transition: 'all 0.2s ease',
+                            backgroundColor: expandedPostingIds[job.id] ? 'rgba(99, 102, 241, 0.1)' : 'transparent'
+                          }}
+                        >
+                          <FileText size={14} />
+                          <span>{expandedPostingIds[job.id] ? 'Hide Description' : 'View Raw Posting'}</span>
+                        </button>
                       ) : (
-                        <span className="ai-metadata-tag empty">Manual Record</span>
+                        <span className="ai-metadata-tag empty" style={{ fontSize: '12px', color: 'rgba(255, 255, 255, 0.2)' }}>
+                          Manual Record
+                        </span>
                       )}
                     </div>
+
+                    {/* Standalone Delete Icon Button Outside the Status Wrapper */}
                     <button 
+                      type="button"
                       onClick={() => handleDeleteJob(job.id)} 
                       className="delete-row-action"
                       title="Purge row entry"
                     >
                       <Trash2 size={16} />
                     </button>
+
                   </div>
                 </div>
               ))}
