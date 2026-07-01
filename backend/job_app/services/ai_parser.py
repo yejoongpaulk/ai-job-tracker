@@ -58,7 +58,21 @@ async def generate_job_summary(raw_text: str) -> str:
             # --- STATUS RESOLUTION ENGINE ---
             if response.status_code == 200:
                 data = response.json()
-                # Safely extract standard OpenAI-compatible choices mapping array
+
+                # --- SAFE INTERCEPTION ENGINE ---
+                # Check if OpenRouter passed an inner error wrapped inside a 200 OK block
+                if "error" in data:
+                    error_info = data["error"]
+                    return (
+                        f"[OpenRouter Inner Error]: Code {error_info.get('code')} - "
+                        f"{error_info.get('message')}"
+                    )
+                
+                # Verify that the expected choices array actually exists
+                if "choices" not in data or not data["choices"]:
+                    return f"[AI Layout Error]: Received an unexpected payload format from OpenRouter. Raw: {data}"
+                
+                # Safely extract standard OpenAI-compatible completions
                 return data["choices"][0]["message"]["content"]
             
             elif response.status_code == 429:

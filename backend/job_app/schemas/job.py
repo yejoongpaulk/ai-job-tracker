@@ -1,5 +1,6 @@
 # job_app/schemas/job.py
 from pydantic import BaseModel, Field, ConfigDict  # 🔒 Import ConfigDict
+from typing import Optional
 from ..models.jobs import JobStatus
 
 class JobCreate(BaseModel):
@@ -23,9 +24,6 @@ class JobResponse(BaseModel):
     model_config = ConfigDict(from_attributes=True)
 
     ai_summary: Optional[str] = None
-
-    class Config:
-        from_attributes = True
 
 
 class JobStatusUpdate(BaseModel):

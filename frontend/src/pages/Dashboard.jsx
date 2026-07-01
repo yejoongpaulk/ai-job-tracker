@@ -24,11 +24,11 @@ const Dashboard = () => {
   // Form states for creating a new job entry
   const [title, setTitle] = useState('');
   const [companyName, setCompanyName] = useState('');
-  const [status, setStatus] = useState('Wishlist'); // This matches your Enum entry string
+  const [status, setStatus] = useState('Wishlist'); 
   const [rawJobPosting, setRawJobPosting] = useState('');
   const [isSubmitting, setIsSubmitting] = useState(false);
 
-  // Add this state hook along with your other state variables
+  // Structural tracking state dictionaries for individual card button actions
   const [processingAiIds, setProcessingAiIds] = useState({});
   const [expandedPostingIds, setExpandedPostingIds] = useState({});
 
@@ -60,7 +60,7 @@ const Dashboard = () => {
     try {
       const response = await api.post('/jobs/', {
         title,
-        company_name: companyName, // Maps to snake_case schema property
+        company_name: companyName,
         status,
         raw_job_posting: rawJobPosting || null
       });
@@ -71,7 +71,7 @@ const Dashboard = () => {
       // Reset input fields upon success
       setTitle('');
       setCompanyName('');
-      setStatus('Applied');
+      setStatus('Wishlist'); // <-- FIXED: Stays locked to Wishlist default
       setRawJobPosting('');
     } catch (err) {
       setError(err.response?.data?.detail || 'Failed to append tracking entry.');
@@ -86,8 +86,6 @@ const Dashboard = () => {
       const response = await api.patch(`/jobs/${jobId}/status`, {
         status: newStatus
       });
-
-      // Map across rows to swap status context inline
       setJobs(jobs.map(job => job.id === jobId ? response.data : job));
     } catch (err) {
       alert('Failed to update status validation requirements.');
@@ -100,7 +98,6 @@ const Dashboard = () => {
 
     try {
       await api.delete(`/jobs/${jobId}`);
-      // Filter out deleted row object from reactive array state
       setJobs(jobs.filter(job => job.id !== jobId));
     } catch (err) {
       alert('Unauthorized removal attempt or missing server link.');
@@ -109,48 +106,39 @@ const Dashboard = () => {
 
   // Helper utility to style background states dynamically based on status values
   const getStatusBadgeClass = (currentStatus) => {
-  switch (currentStatus) {
-    case 'Offer': return 'badge-success';         // Matches backend "Offer"
-    case 'Interviewing': return 'badge-warning';
-    case 'Rejected': return 'badge-danger';
-    case 'Ghosted': return 'badge-danger';         // Styled like rejected
-    case 'Wishlist': return 'badge-neutral';
-    default: return 'badge-neutral';
-  }
+    switch (currentStatus) {
+      case 'Offer': return 'badge-success';
+      case 'Interviewing': return 'badge-warning';
+      case 'Rejected': return 'badge-danger';
+      case 'Ghosted': return 'badge-danger';
+      case 'Wishlist': return 'badge-neutral';
+      default: return 'badge-neutral';
+    }
+  }; // <-- FIXED: Added missing closing bracket here!
 
-  // generate the actual AI summary
+  // Generates the actual AI summary on-demand (POST /jobs/{id}/summarize)
   const handleGenerateAiSummary = async (jobId) => {
-    // Lock the card UI and mark it as active/loading
     setProcessingAiIds(prev => ({ ...prev, [jobId]: true }));
     setError('');
 
     try {
       const response = await api.post(`/jobs/${jobId}/summarize`);
-      
-      // Instantly swap the updated row with the new ai_summary text into the reactive array
       setJobs(jobs.map(job => job.id === jobId ? response.data : job));
     } catch (err) {
       if (err.response?.status === 429) {
-        alert(err.response.data.detail); // Valkey rate limit block
+        alert(err.response.data.detail);
       } else {
         alert(err.response?.data?.detail || "Failed to trigger remote AI completions.");
       }
     } finally {
-      // Unlock the card component
       setProcessingAiIds(prev => ({ ...prev, [jobId]: false }));
     }
   };
 
-
-  // show the actual raw text of the posting
+  // Shows the actual raw text of the posting inline
   const togglePostingVisibility = (jobId) => {
-    setExpandedPostingIds(prev => ({
-      ...prev,
-      [jobId]: !prev[jobId]
-    }));
+    setExpandedPostingIds(prev => ({ ...prev, [jobId]: !prev[jobId] }));
   };
-};
-
 
   // --- 3. UI LAYOUT RENDERING ---
   return (
@@ -231,6 +219,25 @@ const Dashboard = () => {
                       whiteSpace: 'pre-line'
                     }}>
                       {job.ai_summary}
+                    </div>
+                  )}
+
+                  {/* --- ADD THIS CONTAINER TO RENDER THE TEXT --- */}
+                  {expandedPostingIds[job.id] && job.raw_job_posting && (
+                    <div className="raw-posting-lightbox" style={{
+                      backgroundColor: '#0f172a',
+                      border: '1px solid rgba(255, 255, 255, 0.05)',
+                      padding: '16px',
+                      borderRadius: '6px',
+                      maxHeight: '260px',
+                      overflowY: 'auto',
+                      margin: '12px 0',
+                      fontSize: '13px',
+                      color: '#94a3b8',
+                      whiteSpace: 'pre-wrap',
+                      fontFamily: 'monospace'
+                    }}>
+                      {job.raw_job_posting}
                     </div>
                   )}
 

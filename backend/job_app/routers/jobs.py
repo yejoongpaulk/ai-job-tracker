@@ -1,11 +1,13 @@
 # job_app/routers/jobs.py
-from fastapi import APIRouter, Depends, HTTPException, status
+# Look for your fastapi import statement and change it to this:
+from fastapi import APIRouter, Depends, HTTPException, status, Request
+
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy import select
 
 from ..database import get_db
 from ..models.jobs import Job
-from ..dependency import get_current_user
+from ..dependency import get_current_user, rate_limit_ai_requests
 from ..schemas.auth import SessionData
 from ..schemas.job import JobCreate, JobStatusUpdate, JobResponse
 from ..services.ai_parser import generate_job_summary
