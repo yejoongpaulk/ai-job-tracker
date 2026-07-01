@@ -22,6 +22,11 @@ class JobResponse(BaseModel):
     # 🚀 Replace class Config with modern v2 model_config dictionary mapping!
     model_config = ConfigDict(from_attributes=True)
 
+    ai_summary: Optional[str] = None
+
+    class Config:
+        from_attributes = True
+
 
 class JobStatusUpdate(BaseModel):
     """

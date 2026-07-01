@@ -8,6 +8,8 @@ from ..models.jobs import Job
 from ..dependency import get_current_user
 from ..schemas.auth import SessionData
 from ..schemas.job import JobCreate, JobStatusUpdate, JobResponse
+from ..services.ai_parser import generate_job_summary
+
 
 router = APIRouter(prefix="/jobs", tags=["Jobs Tracker"])
 
@@ -35,12 +37,19 @@ async def create_job_row(
     """
     Creates a new tracking entry. (AI parsing logic can hook into this pipeline next)
     """
+
+    ai_summary_content = None
+
+    if job_input.raw_job_posting:
+        ai_summary_content = await generate_job_summary(job_input.raw_job_posting)
+
     new_job = Job(
         user_id=current_user.user_id,
         title=job_input.title,
         company_name=job_input.company_name,
         status=job_input.status,
-        raw_job_posting=job_input.raw_job_posting
+        raw_job_posting=job_input.raw_job_posting,
+        ai_summary=ai_summary_content
     )
     
     db.add(new_job)
@@ -99,3 +108,44 @@ async def delete_job_row(
     await db.delete(job)
     await db.commit()
     return None
+
+
+# 5. GENERATE AI SUMMARY ON-DEMAND (Lazy Execution)
+@router.post("/{job_id}/summarize", response_model=JobResponse)
+async def summarize_existing_job(
+    job_id: int,
+    request: Request,
+    db: AsyncSession = Depends(get_db),
+    current_user: SessionData = Depends(get_current_user),
+    _rate_lock = Depends(rate_limit_ai_requests) # Protects OpenRouter keys from abuse
+):
+    """
+    Triggers NVIDIA Nemotron to generate a summary for a job already tracking in the database.
+    """
+    # 1. Fetch the target row, ensuring the authenticated user owns it
+    query = select(Job).where((Job.id == job_id) & (Job.user_id == current_user.user_id))
+    result = await db.execute(query)
+    job = result.scalar_one_or_none()
+    
+    if not job:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND, 
+            detail="Job tracking row not found or unauthorized access."
+        )
+        
+    # 2. Guard: Verify there is actually text to send to the AI
+    if not job.raw_job_posting or not job.raw_job_posting.strip():
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail="Cannot generate summary: The job posting clipboard text is completely empty."
+        )
+
+    # 3. Fire the OpenRouter service call
+    ai_summary_content = await generate_job_summary(job.raw_job_posting)
+    
+    # 4. Commit the new text back into the database cell
+    job.ai_summary = ai_summary_content
+    await db.commit()
+    await db.refresh(job)
+    
+    return job

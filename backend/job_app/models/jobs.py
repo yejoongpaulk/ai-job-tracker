@@ -30,3 +30,4 @@ class Job(Base):
     )
     
     raw_job_posting: Mapped[str] = mapped_column(Text, nullable=False)
+    ai_summary: Column(Text, nullable=True)
