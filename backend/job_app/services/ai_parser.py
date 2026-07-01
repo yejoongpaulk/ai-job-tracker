@@ -4,7 +4,8 @@ import httpx
 
 
 # Centralized OpenRouter API Endpoint
-OPENROUTER_URL = "https://openrouter.ai"
+OPENROUTER_URL = os.environ["OPENROUTER_URL"]
+MODEL_NAME = os.environ["MODEL_NAME"]
 
 
 
@@ -26,8 +27,6 @@ async def generate_job_summary(raw_text: str) -> str:
     headers = {
         "Authorization": f"Bearer {api_key}",
         "Content-Type": "application/json",
-        "HTTP-Referer": "http://localhost:3000",
-        "X-OpenRouter-Title": "AI Job Tracker"
     }
 
     # Strict system execution guidelines matching your exact required formatting layout
@@ -43,7 +42,7 @@ async def generate_job_summary(raw_text: str) -> str:
 
     # Package standard payload targeting the 550B MoE model tier
     payload = {
-        "model": "nvidia/nemotron-3-ultra-550b-a55b:free",
+        "model": MODEL_NAME,
         "messages": [
             {"role": "system", "content": system_prompt},
             {"role": "user", "content": raw_text}
