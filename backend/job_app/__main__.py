@@ -9,6 +9,8 @@ _ = load_dotenv(os.path.join(os.path.dirname(os.path.dirname(__file__)), ".env")
 import uvicorn
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
+from fastapi.staticfiles import StaticFiles
+from fastapi.responses import FileResponse
 
 from .database import engine, Base
 from .dependency import valkey_client
@@ -47,20 +49,22 @@ app = FastAPI(
 
 # ==========================================
 # 3. CORS Middleware Configuration (For React Frontend)
+#
+# Only applies during development (i.e. not in production)
 # ==========================================
-# Update origins list when deployment URLs or local development ports shift
-origins = [
-    "http://localhost:3000",  # Default React development port
-    "http://127.0.0.1:3000",
-]
+# # Update origins list when deployment URLs or local development ports shift
+# origins = [
+#     "http://localhost:3000",  # Default React development port
+#     "http://127.0.0.1:3000",
+# ]
 
-app.add_middleware(
-    CORSMiddleware,
-    allow_origins=origins,
-    allow_credentials=True,     # 🔒 CRITICAL: Allows browser to pass Valkey cookies back and forth
-    allow_methods=["*"],        # Allows GET, POST, OPTIONS, PATCH, DELETE
-    allow_headers=["*"],
-)
+# app.add_middleware(
+#     CORSMiddleware,
+#     allow_origins=origins,
+#     allow_credentials=True,     # 🔒 CRITICAL: Allows browser to pass Valkey cookies back and forth
+#     allow_methods=["*"],        # Allows GET, POST, OPTIONS, PATCH, DELETE
+#     allow_headers=["*"],
+# )
 
 
 # ==========================================
@@ -74,6 +78,25 @@ app.include_router(jobs.router)
 async def health_check():
     """Simple baseline route for health pings and deployment smoke-tests."""
     return {"status": "healthy", "service": "ai-job-tracker"}
+
+
+# ==========================================
+# 5. Mount resources from static files (i.e. npm run build)
+# ==========================================
+current_dir = os.path.dirname(os.path.abspath(__file__))
+frontend_dir = os.path.abspath(os.path.join(current_dir, "..", "dist"))
+
+app.mount("/assets", StaticFiles(directory=os.path.join(frontend_dir, "assets")), name="assets")
+
+# 4. Catch-all route to serve index.html for React Router (SPA tracking)
+@app.get("/{catchall:path}")
+def serve_react_app(catchall: str):
+    # Prevent intercepting API routes
+    if catchall.startswith("api/"):
+        return {"error": "Not Found"}
+        
+    index_path = os.path.join(frontend_dir, "index.html")
+    return FileResponse(index_path)
 
 
 # Executable entry point hook if script run via python directly
