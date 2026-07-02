@@ -3,7 +3,6 @@ import os
 from fastapi import Request, HTTPException, status
 from valkey import asyncio as valkey  # type: ignore[reportMissingImports]
 
-# Import get_db directly from your database file!
 from .database import get_db
 from .schemas.auth import SessionData
 
@@ -22,6 +21,9 @@ valkey_client = valkey.from_url(VALKEY_URL, decode_responses=True)
 
 COOKIE_NAME = "job_tracker_session"
 
+# ==========================================
+# CURRENT USER: returns the current user in the session.
+# ==========================================
 async def get_current_user(request: Request) -> SessionData:
     """
     Reads the session cookie, checks Valkey, and returns the validated user data.

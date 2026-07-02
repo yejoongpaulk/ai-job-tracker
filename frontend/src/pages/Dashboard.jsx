@@ -186,7 +186,7 @@ const Dashboard = () => {
                       </div>
                     </div>
 
-                    {/* Status Mutation Cell Picker Selector */}
+                    {/* Status Picker Selector */}
                     <div className="status-mutation-cell">
                       <span className={`status-badge ${getStatusBadgeClass(job.status)}`}>
                         {job.status}
@@ -222,7 +222,7 @@ const Dashboard = () => {
                     </div>
                   )}
 
-                  {/* --- ADD THIS CONTAINER TO RENDER THE TEXT --- */}
+                  {/* Render the raw job posting if prompted */}
                   {expandedPostingIds[job.id] && job.raw_job_posting && (
                     <div className="raw-posting-lightbox" style={{
                       backgroundColor: '#0f172a',

@@ -3,7 +3,7 @@ import httpx
 
 
 
-# Centralized OpenRouter API Endpoint
+# OS environment variables for the URL and the model to use 
 OPENROUTER_URL = os.environ["OPENROUTER_URL"]
 MODEL_NAME = os.environ["MODEL_NAME"]
 
@@ -40,7 +40,7 @@ async def generate_job_summary(raw_text: str) -> str:
         "Do not include conversational filler, meta-announcements, or greetings."
     )
 
-    # Package standard payload targeting the 550B MoE model tier
+    # Package standard payload for the OpenRouter model
     payload = {
         "model": MODEL_NAME,
         "messages": [
@@ -55,11 +55,10 @@ async def generate_job_summary(raw_text: str) -> str:
         async with httpx.AsyncClient() as client:
             response = await client.post(OPENROUTER_URL, headers=headers, json=payload, timeout=45.0)
             
-            # --- STATUS RESOLUTION ENGINE ---
+            # case where response is perfectly valid
             if response.status_code == 200:
                 data = response.json()
 
-                # --- SAFE INTERCEPTION ENGINE ---
                 # Check if OpenRouter passed an inner error wrapped inside a 200 OK block
                 if "error" in data:
                     error_info = data["error"]
@@ -78,7 +77,7 @@ async def generate_job_summary(raw_text: str) -> str:
             elif response.status_code == 429:
                 # Capture API usage ceilings cleanly without locking up the front-end dashboard
                 return (
-                    "[OpenRouter Rate Limit Activated]: The free NVIDIA Nemotron engine is currently "
+                    "[OpenRouter Rate Limit Activated]: The free AI engine is currently "
                     "busy or your local request limit was reached. Please wait 60 seconds before trying again."
                 )
             

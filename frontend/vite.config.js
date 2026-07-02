@@ -9,7 +9,7 @@ export default defineConfig({
     proxy: {
       // Intercepts any request starting with /auth or /jobs
       '/auth': {
-        target: 'http://127.0.0.1:8000', // Points directly to your FastAPI server local port
+        target: 'http://127.0.0.1:8000',
         changeOrigin: true,
         secure: false,
       },

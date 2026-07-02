@@ -112,7 +112,8 @@ async def delete_job_row(
     return None
 
 
-# 5. GENERATE AI SUMMARY ON-DEMAND (Lazy Execution)
+# 5. GENERATE AI SUMMARY ON-DEMAND (Lazy Execution, for situations when
+# the job has raw job posting text but doesn't have an AI summary yet)
 @router.post("/{job_id}/summarize", response_model=JobResponse)
 async def summarize_existing_job(
     job_id: int,
@@ -122,7 +123,7 @@ async def summarize_existing_job(
     _rate_lock = Depends(rate_limit_ai_requests) # Protects OpenRouter keys from abuse
 ):
     """
-    Triggers NVIDIA Nemotron to generate a summary for a job already tracking in the database.
+    Triggers AI Model to generate a summary for a job already tracking in the database.
     """
     # 1. Fetch the target row, ensuring the authenticated user owns it
     query = select(Job).where((Job.id == job_id) & (Job.user_id == current_user.user_id))

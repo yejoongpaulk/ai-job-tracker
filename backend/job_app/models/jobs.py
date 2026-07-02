@@ -5,12 +5,12 @@ from ..database import Base
 
 
 class JobStatus(str, enum.Enum):
-    WISHLIST = "Wishlist"        # <-- Job saved as a to-do, application not yet submitted
-    APPLIED = "Applied"
-    INTERVIEWING = "Interviewing"
-    OFFER = "Offer"
-    REJECTED = "Rejected"
-    GHOSTED = "Ghosted"
+    WISHLIST = "Wishlist" # to-do (not submitted)
+    APPLIED = "Applied" # applied
+    INTERVIEWING = "Interviewing" # in the process of interviews
+    OFFER = "Offer" # received an offer
+    REJECTED = "Rejected" # self-explanatory
+    GHOSTED = "Ghosted" # no response despite follow ups
 
 
 class Job(Base):

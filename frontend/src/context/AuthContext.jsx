@@ -31,9 +31,6 @@ export const AuthProvider = ({ children }) => {
   }, []);
 
   // --- 3. AUTHENTICATION ACTIONS LAYER ---
-  
-    // --- 3. AUTHENTICATION ACTIONS LAYER ---
-  
   // Triggers your FastAPI login router and lets the browser drop the HttpOnly cookie
   const login = async (email, password) => {
     // Explicitly passes a structured object to match your UserLogin schema
