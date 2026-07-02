@@ -21,6 +21,7 @@ backend/.venv/
 backend/venv/
 backend/ENV/
 backend/.env
+backend/dist/
 **/__pycache__/**
 
 # =====================================================================
